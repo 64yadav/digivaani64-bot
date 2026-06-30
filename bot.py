@@ -50,18 +50,18 @@ COURSES = [
 # tujhe (admin) turant ek alert message Telegram pe aayega.
 # ═══════════════════════════════════════
 async def notify_admin(context: ContextTypes.DEFAULT_TYPE, user, message: str):
-    """Admin ko Telegram pe notification bhejta hai."""
+    """Admin ko Telegram pe notification bhejta hai (plain text — Markdown errors se bachne ke liye)."""
     try:
         username = f"@{user.username}" if user.username else "(no username)"
         full_name = user.full_name or "Unknown"
         text = (
-            f"🔔 *Naya Activity!*\n\n"
+            f"🔔 Naya Activity!\n\n"
             f"👤 Naam: {full_name}\n"
             f"🔗 Username: {username}\n"
-            f"🆔 User ID: `{user.id}`\n\n"
+            f"🆔 User ID: {user.id}\n\n"
             f"📋 {message}"
         )
-        await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode="Markdown")
+        await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text)
     except Exception as e:
         logger.error(f"Admin notification failed: {e}")
 
@@ -160,7 +160,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
             # Admin ko notify karo — kisi service mein interest dikhaya
-            await notify_admin(context, update.effective_user, f"Service mein interest dikhaya: *{svc['title']}*")
+            await notify_admin(context, update.effective_user, f"Service mein interest dikhaya: {svc['title']}")
 
     # ── Specific course click — link bhejo ──
     elif data.startswith("course_"):
@@ -177,7 +177,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
             # Admin ko notify karo — kisi course mein interest dikhaya
-            await notify_admin(context, update.effective_user, f"Course mein interest dikhaya: *{course['title']}*")
+            await notify_admin(context, update.effective_user, f"Course mein interest dikhaya: {course['title']}")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
