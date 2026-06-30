@@ -1,16 +1,9 @@
-"""
-DigiVaani64 Telegram Bot
-Services aur Courses dikhata hai, click karne pe website ka link bhejta hai.
 
-Setup:
-1. requirements.txt install karo: pip install -r requirements.txt
-2. .env file banao aur BOT_TOKEN daalo (ya environment variable set karo)
-3. python bot.py se run karo
-"""
 
 import os
 import logging
 import threading
+import asyncio
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -191,10 +184,16 @@ def main():
         print("⚠️  ERROR: BOT_TOKEN set nahi hai! .env file ya environment variable mein daalo.")
         return
 
-    # Flask server ko alag thread mein chalao taaki bot polling block na ho
+    # Flask server ko background thread mein chalao (sirf Render health-check ke liye)
     flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
 
+    # Main thread ke liye fresh event loop explicitly set karo
+    # (Flask thread ki wajah se kabhi-kabhi default loop missing ho jata hai)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # Bot ko MAIN thread mein chalao — isse event loop conflict nahi hota
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -202,7 +201,7 @@ def main():
     app.add_handler(CallbackQueryHandler(button_handler))
 
     print("✅ Bot start ho gaya! Telegram pe jaake test karo.")
-    app.run_polling()
+    app.run_polling(close_loop=False)
 
 
 if __name__ == "__main__":
