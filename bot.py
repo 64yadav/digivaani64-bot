@@ -80,12 +80,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     text = (
-        "Namaste! 🙏 *DigiVaani64* mein aapka swagat hai.\n\n"
+        "Namaste! 🙏 DigiVaani64 mein aapka swagat hai.\n\n"
         "Hum digital services dete hain aur skill courses bhi sikhate hain.\n"
         "Neeche se option chuniye:"
     )
 
-    await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+    await update.message.reply_text(text, reply_markup=reply_markup)
 
     # Admin ko notify karo ki naya user aaya
     await notify_admin(context, update.effective_user, "Bot ko /start kiya (naya ya returning user)")
@@ -109,9 +109,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await query.edit_message_text(
-            "🤖 *Hamari Services:*\n\nKisi bhi service pe click karke details dekho.",
+            "🤖 Hamari Services:\n\nKisi bhi service pe click karke details dekho.",
             reply_markup=reply_markup,
-            parse_mode="Markdown",
         )
 
     # ── Main menu: Courses list dikhao ──
@@ -125,9 +124,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await query.edit_message_text(
-            "🎓 *Hamare Courses:*\n\nKisi bhi course pe click karke syllabus dekho.",
+            "🎓 Hamare Courses:\n\nKisi bhi course pe click karke syllabus dekho.",
             reply_markup=reply_markup,
-            parse_mode="Markdown",
         )
 
     # ── Back to main menu ──
@@ -139,11 +137,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         text = (
-            "Namaste! 🙏 *DigiVaani64* mein aapka swagat hai.\n\n"
+            "Namaste! 🙏 DigiVaani64 mein aapka swagat hai.\n\n"
             "Hum digital services dete hain aur skill courses bhi sikhate hain.\n"
             "Neeche se option chuniye:"
         )
-        await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+        await query.edit_message_text(text, reply_markup=reply_markup)
 
     # ── Specific service click — link bhejo ──
     elif data.startswith("svc_"):
@@ -156,8 +154,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("⬅️ Back to Services", callback_data="menu_services")],
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            text = f"{svc['icon']} *{svc['title']}*\n\n{svc['desc']}\n\nPuri details ke liye niche click karo:"
-            await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+            text = f"{svc['icon']} {svc['title']}\n\n{svc['desc']}\n\nPuri details ke liye niche click karo:"
+            await query.edit_message_text(text, reply_markup=reply_markup)
 
             # Admin ko notify karo — kisi service mein interest dikhaya
             await notify_admin(context, update.effective_user, f"Service mein interest dikhaya: {svc['title']}")
@@ -173,8 +171,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("⬅️ Back to Courses", callback_data="menu_courses")],
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            text = f"{course['icon']} *{course['title']}*\n\n{course['desc']}\n\nPuri details ke liye niche click karo:"
-            await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+            text = f"{course['icon']} {course['title']}\n\n{course['desc']}\n\nPuri details ke liye niche click karo:"
+            await query.edit_message_text(text, reply_markup=reply_markup)
 
             # Admin ko notify karo — kisi course mein interest dikhaya
             await notify_admin(context, update.effective_user, f"Course mein interest dikhaya: {course['title']}")
