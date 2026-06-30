@@ -3,7 +3,6 @@
 import os
 import logging
 import threading
-import asyncio
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -187,11 +186,6 @@ def main():
     # Flask server ko background thread mein chalao (sirf Render health-check ke liye)
     flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
-
-    # Main thread ke liye fresh event loop explicitly set karo
-    # (Flask thread ki wajah se kabhi-kabhi default loop missing ho jata hai)
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
 
     # Bot ko MAIN thread mein chalao — isse event loop conflict nahi hota
     app = Application.builder().token(BOT_TOKEN).build()
