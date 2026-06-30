@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # ── CONFIG: Yahan apni details daalo ──
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 WEBSITE_BASE = "https://64yadav.github.io/DigiVaani"
+ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID", "1790823274")  # Tera Telegram Chat ID — yahan notifications aayengi
 
 # ── DATA: Services aur Courses (data.js jaisa hi, yahan bhi sync rakhna) ──
 SERVICES = [
@@ -44,6 +45,28 @@ COURSES = [
 
 
 # ═══════════════════════════════════════
+# ADMIN NOTIFICATION HELPER
+# Jab bhi koi user bot use kare ya kisi service/course me interest dikhaye,
+# tujhe (admin) turant ek alert message Telegram pe aayega.
+# ═══════════════════════════════════════
+async def notify_admin(context: ContextTypes.DEFAULT_TYPE, user, message: str):
+    """Admin ko Telegram pe notification bhejta hai."""
+    try:
+        username = f"@{user.username}" if user.username else "(no username)"
+        full_name = user.full_name or "Unknown"
+        text = (
+            f"🔔 *Naya Activity!*\n\n"
+            f"👤 Naam: {full_name}\n"
+            f"🔗 Username: {username}\n"
+            f"🆔 User ID: `{user.id}`\n\n"
+            f"📋 {message}"
+        )
+        await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode="Markdown")
+    except Exception as e:
+        logger.error(f"Admin notification failed: {e}")
+
+
+# ═══════════════════════════════════════
 # HANDLERS
 # ═══════════════════════════════════════
 
@@ -63,6 +86,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+    # Admin ko notify karo ki naya user aaya
+    await notify_admin(context, update.effective_user, "Bot ko /start kiya (naya ya returning user)")
 
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -133,6 +159,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text = f"{svc['icon']} *{svc['title']}*\n\n{svc['desc']}\n\nPuri details ke liye niche click karo:"
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
+            # Admin ko notify karo — kisi service mein interest dikhaya
+            await notify_admin(context, update.effective_user, f"Service mein interest dikhaya: *{svc['title']}*")
+
     # ── Specific course click — link bhejo ──
     elif data.startswith("course_"):
         course_id = data.replace("course_", "")
@@ -146,6 +175,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
             text = f"{course['icon']} *{course['title']}*\n\n{course['desc']}\n\nPuri details ke liye niche click karo:"
             await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+            # Admin ko notify karo — kisi course mein interest dikhaya
+            await notify_admin(context, update.effective_user, f"Course mein interest dikhaya: *{course['title']}*")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
